@@ -7,11 +7,10 @@ using System.Threading.Tasks;
 
 namespace ImagierWebDomain.EntityModels
 {
-    public class Repository
+    public class Category
     {
-        public int UserId { get; set; }
         [Key]
-        public int RepositoryId { get; set; }
-        public int RepositoryName { get; set; }
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
     }
 }
