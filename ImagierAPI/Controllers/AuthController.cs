@@ -100,7 +100,54 @@ namespace ImagierAPI.Controllers
             }
             return Unauthorized();
         }
+        [HttpPost]
+        [Route("create-adminuser")]
+        public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
+        {
+            var userExist = await userManager.FindByNameAsync(model.UserName);
+            if (userExist != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new Response
+                    {
+                        Message = "User Already Exists",
+                        Status = "Error"
+                    });
+            }
+            ApplicationUser user = new ApplicationUser()
+            {
+                Email = model.Email,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = model.UserName
+            };
+            var result = await userManager.CreateAsync(user, model.Password);
+            if (!result.Succeeded)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new Response
+                    {
+                        Message = "User Registration Failed",
+                        Status = "Error"
+                    });
+            }
+            if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
+                await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+            if (!await roleManager.RoleExistsAsync(UserRoles.User))
+                await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+            if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
+            {
+                await userManager.AddToRoleAsync(user, UserRoles.Admin); 
+            }
+            {
+                return Ok(new Response
+                {
+                    Message = "User Created Successfully",
+                    Status = "Success"
+                });
+            }
+        }
+
     }
-            
+
 }
 
