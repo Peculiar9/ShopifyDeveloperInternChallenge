@@ -10,7 +10,7 @@ namespace ImagierWebDomain.EntityModels
         public string ImageFile { get; set; }
         public string ImageName { get; set; }
         public string ImageType { get; set; }
-        public string ImageCategory { get; set; }
+        public int CategoryId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         //public User UpdatedAt { get; set; }
