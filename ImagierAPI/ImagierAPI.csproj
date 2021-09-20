@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ImageServices\ImageServices.csproj" />
     <ProjectReference Include="..\ImagierWebDomain\ImagierWebDomain.csproj" />
   </ItemGroup>
 
