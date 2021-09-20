@@ -2,30 +2,32 @@
 using ImageServices.ImageServices;
 using ImagierAPI.Dtos;
 using ImagierWebDomain.EntityModels;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace ImagierAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/images")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class ImageController : ControllerBase
     {
+        private readonly IWebHostEnvironment _environment;
         private readonly IRepositoryServices _service;
         private readonly IMapper _mapper;
         private readonly ApplicationUser _userModel = new ApplicationUser();
-        public ImageController(IRepositoryServices service, IMapper mapper, ApplicationUser userModel)
+        public ImageController(IRepositoryServices service, IMapper mapper, ApplicationUser userModel, IWebHostEnvironment environment)
         {
             _service = service;
             _mapper = mapper;
             _userModel = userModel;
+            _environment = environment;
         }
+
 
 
         [HttpGet]
@@ -33,7 +35,6 @@ namespace ImagierAPI.Controllers
         // GET api/images
         public ActionResult<IEnumerable<ImagesReadDto>> GetAllImages()
         {
-
 
             var commandItems = _service.GetImageAssets();
 
@@ -49,15 +50,57 @@ namespace ImagierAPI.Controllers
                 return Ok(_mapper.Map<ImagesReadDto>(images));
             return NotFound();
         }
-
+        public class Response
+        {
+            public string Status { get; set; }
+            public string Message { get; set; }
+        }
         //POST api/images
         [HttpPost]
-        public ActionResult<ImagesReadDto> CreateCommand(ImagesCreateDto imagesCreateDto)
+        public async Task<ActionResult<ImagesReadDto>> CreateCommand([FromForm]ImagesCreateDto imagesCreateDto)
         {
-            var imagesAsset = _mapper.Map<ImageAsset>(imagesCreateDto);
+            var uploadDirectory = _environment.WebRootPath + "\\Upload\\";
+            if (imagesCreateDto.ImageFile.Length > 0)
+            {
+                if (!Directory.Exists(uploadDirectory))
+                {
+                    Directory.CreateDirectory(uploadDirectory);
+                }
+                using (FileStream fileStream = System.IO.File.Create(uploadDirectory + imagesCreateDto.ImageFile.FileName))
+                {
+                     await imagesCreateDto.ImageFile.CopyToAsync(fileStream);
+                     fileStream.Flush();
+                    new Response
+                    {
+                        Status = "Success",
+                        Message = "Upload Successful"
+                    };
+                }
+                    
+            }
+            else
+            {
+                new Response
+                {
+                    Status = "Error",
+                    Message = "Upload Not Successful"
+                };
+            }
+
+            var imagesAsset = new ImageAsset()  
+            {
+                ImageFile = imagesCreateDto.ImageFile.ToString(),
+                CreatedAt = DateTime.Now,
+                CreatedBy = _userModel.UserName.ToString(),
+                Id = Guid.NewGuid(),
+                ImageName = imagesCreateDto.ImageName,
+                ImageType = imagesCreateDto.ImageType,
+                CategoryId = imagesCreateDto.CategoryId,
+            };
             _service.CreateAsset(imagesAsset);
             _service.SaveChanges();
 
+               
             var imagesReadDto = _mapper.Map<ImagesReadDto>(imagesAsset);
 
             return CreatedAtRoute(nameof(GetImagesById), new { Id = imagesReadDto.Id }, imagesReadDto);
