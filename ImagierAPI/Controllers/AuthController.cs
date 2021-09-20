@@ -29,7 +29,7 @@ namespace ImagierAPI.Controllers
             _configuration = configuration;
         }
         [HttpPost]
-        [Route("create-user")]
+        [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             var userExist = await userManager.FindByNameAsync(model.UserName);
@@ -46,7 +46,7 @@ namespace ImagierAPI.Controllers
              {
                  Email = model.Email,
                  SecurityStamp = Guid.NewGuid().ToString(),
-                 UserName = model.UserName
+                 UserName = "Peculiar"
              };
             var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
