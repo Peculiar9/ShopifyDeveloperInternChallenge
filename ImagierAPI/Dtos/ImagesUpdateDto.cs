@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace ImagierAPI.Dtos
 {
-    public class ImagesReadDto
+    public class ImagesUpdateDto
     {
+
         public Guid Id { get; set; }
         public int UserId { get; set; }
         public FormFile ImageFile { get; set; }

@@ -14,7 +14,7 @@ namespace ImagierWebDomain.EntityModels
         public string ImageType { get; set; }
         public int CategoryId { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set;   
+        public DateTime UpdatedAt { get; set; }   
         public string UpdatedBy { get; set; }
 
 
