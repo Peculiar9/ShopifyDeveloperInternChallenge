@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace ImagierWebDomain.EntityModels
+namespace ImagierAPI.Dtos
 {
-    public class ImageAsset
+    public class ImagesReadDto
     {
-        [Key]
         public Guid Id { get; set; }
         public int UserId { get; set; }
         public string ImageFile { get; set; }
@@ -14,9 +14,7 @@ namespace ImagierWebDomain.EntityModels
         public string ImageType { get; set; }
         public int CategoryId { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set;   
+        public DateTime UpdatedAt { get; set; }
         public string UpdatedBy { get; set; }
-
-
     }
 }

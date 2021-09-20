@@ -1,3 +1,5 @@
+using ImageServices.ImageServices;
+using ImagierAPI.ServiceRepo;
 using ImagierWebDomain.EntityModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -64,6 +66,7 @@ namespace ImagierAPI
 
                     };
                 });
+             services.AddScoped<IRepositoryServices, ImageServiceRepo>();
              services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
         }

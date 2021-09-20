@@ -26,4 +26,8 @@
     <ProjectReference Include="..\ImagierWebDomain\ImagierWebDomain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Profiles\" />
+  </ItemGroup>
+
 </Project>
