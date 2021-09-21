@@ -2,6 +2,7 @@
 using ImageServices.ImageServices;
 using ImagierAPI.Dtos;
 using ImagierWebDomain.EntityModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -13,7 +14,7 @@ namespace ImagierAPI.Controllers
 {
     [Route("api/images")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ImageController : ControllerBase
     {
         private readonly IWebHostEnvironment _environment;
