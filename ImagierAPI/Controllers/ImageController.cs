@@ -3,7 +3,9 @@ using ImageServices.ImageServices;
 using ImagierAPI.Dtos;
 using ImagierWebDomain.EntityModels;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,16 +20,20 @@ namespace ImagierAPI.Controllers
     {
         private readonly IWebHostEnvironment _environment;
         private readonly IRepositoryServices _service;
+
         private readonly IMapper _mapper;
-        private readonly ApplicationUser _userModel = new ApplicationUser();
-        public ImageController(IRepositoryServices service, IMapper mapper, ApplicationUser userModel, IWebHostEnvironment environment)
+        private readonly ILogger _logger;
+        private readonly ApplicationUser _userModel = new ApplicationUser(); 
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly RoleManager<IdentityRole> roleManager;
+        public ImageController(IRepositoryServices service, IMapper mapper, IWebHostEnvironment environment, ILogger logger)
         {
             _service = service;
             _mapper = mapper;
-            _userModel = userModel;
+            _logger = logger;
+            //_userModel = userModel;
             _environment = environment;
         }
-
 
 
         [HttpGet]
@@ -36,16 +42,23 @@ namespace ImagierAPI.Controllers
         public ActionResult<IEnumerable<ImagesReadDto>> GetAllImages()
         {
 
-            var commandItems = _service.GetImageAssets();
+            var imageAssets = _service.GetImageAssets();
+            if (imageAssets != null)   
+                  return Ok(_mapper.Map<IEnumerable<ImagesReadDto>>(imageAssets));
+             
 
-            return Ok(_mapper.Map<IEnumerable<ImagesReadDto>>(commandItems));
+            return Ok(new Response {
+                Message = "Result not found",
+                Status = "Empty Result"
+            });
+
         }
         
         // GET api/images/{id}
         [HttpGet("{id}", Name = "GetImageById")]
         public ActionResult<ImagesReadDto> GetImagesById(Guid id)
         {
-            var images = _service.GetAssetById(id);
+          var images = _service.GetAssetById(id);
             if (images != null)
                 return Ok(_mapper.Map<ImagesReadDto>(images));
             return NotFound();
@@ -109,3 +122,4 @@ namespace ImagierAPI.Controllers
 
     }
 }
+

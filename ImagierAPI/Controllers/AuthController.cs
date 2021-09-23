@@ -22,7 +22,10 @@ namespace ImagierAPI.Controllers
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly IConfiguration _configuration;
 
-        public AuthenticationController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public AuthenticationController(
+            UserManager<ApplicationUser> userManager, 
+            RoleManager<IdentityRole> roleManager, 
+            IConfiguration configuration)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
@@ -32,39 +35,54 @@ namespace ImagierAPI.Controllers
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            var userExist = await userManager.FindByNameAsync(model.UserName);
-            if (userExist != null)
+            try
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new Response
-                    {
-                        Message = "User Already Exists",
-                        Status = "Error"
-                    });
-            }
-            ApplicationUser user = new ApplicationUser()
-             {
-                 Email = model.Email,
-                 SecurityStamp = Guid.NewGuid().ToString(),
-                 UserName = "Peculiar"
-             };
-            var result = await userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new Response
-                    {
-                        Message = "User Registration Failed",
-                        Status = "Error"
-                    });
-            }
-            {
-                return Ok(new Response
+                var userExist = await userManager.FindByNameAsync(model.UserName);
+                if (userExist != null)
                 {
-                    Message = "User Created Successfully",
-                    Status = "Success"
-                });
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                        new Response
+                        {
+                            Message = "User Already Exists",
+                            Status = "Error"
+                        });
+                }
+                ApplicationUser user = new ApplicationUser()
+                {
+                    Email = model.Email,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    UserName = model.UserName,
+                    EmailConfirmed = true
+                };
+
+                var result = await userManager.CreateAsync(user, model.Password);
+
+
+                if (!result.Succeeded)
+                {
+
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                        new Response
+                        {
+                            Message = "User Registration Failed",
+                            Status = "Error"
+                        });
+                }
+                {
+                    return Ok(new Response
+                    {
+                        Message = "User Created Successfully",
+                        Status = "Success"
+                    });
+                }
             }
+            catch (Exception ex)
+            {
+
+                var anything = ex;
+
+            }
+                return Ok();
         }
 
         [HttpPost]
@@ -83,9 +101,9 @@ namespace ImagierAPI.Controllers
                 };
                 foreach (var userRole in roles)
                 {
-                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                    authClaims.Add(new Claim(ClaimTypes.Role, userRole.ToString()));
                 }
-                var authSigninKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+                var authSigninKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]));
                 var token = new JwtSecurityToken(
                     issuer: _configuration["JWT:ValidIssuer"],
                     audience: _configuration["JWT:ValidAudience"],
@@ -95,7 +113,9 @@ namespace ImagierAPI.Controllers
                     );
                 return Ok(new
                 {
-                    token = new JwtSecurityTokenHandler().WriteToken(token)
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    
+
                 }); 
             }
             return Unauthorized();
